@@ -1,0 +1,123 @@
+{%extends 'base.html.twig'%}
+{%block title%}Ligne commande{%endblock%}
+{%block body%}
+<div class="m-auto my-4 w90">
+      <h1 class="center text-light">Saisie ligne commande</h1>
+      <div class="row">
+            <div class="col-md-8">
+                  <input type="text" id='commande_id' name='commande_id' value="{{commande.id}}" class="hidden">
+                  <div class="my-2">
+                        <label for="" class="lab30">N° commande</label>
+                        <input type="text" value="{{commande.numCommande}}" class="form-control w40" disabled>
+                  </div>
+                  <div class="my-2">
+                        <label for="" class="lab30">date commande</label>
+                        <input type="text" value="{{commande.dateCommande|date('d/m/Y')}}" class="form-control w40" disabled>
+                  </div>
+                  <div class="my-2">
+                        <label for="" class="lab30">Client</label>
+                        <input type="text" value="{{commande.client.nomClient}}" class="form-control w40" disabled>
+                  </div>
+            </div>
+                  <div class="col-md-4">
+                        <p id="total"class="w100 fs-1 bg-light text-dark radius-10 p-4 h-100 d-flex justify-content-center align-items-center">{{total}}</p>
+                  </div>
+            </div>
+            <table class="w100">
+                  <thead>
+                        <tr class="bg-dark text-light">
+                              <th class="w20">code</th>
+                              <th class="w50">designation</th>
+                              <th class="w10">pu</th>
+                              <th class="w10">quantité</th>
+                              <th class="w10">montant</th>
+                        </tr>
+                        <tr>
+                              <th class="" id=""><input onkeydown="searchCode(event)" id="numArticle" name="numArticle" value="" type="text" class="form-control w100"></th>
+                              <th class="" id="designation"></th>
+                              <th class="" id="prixUnitaire"></th>
+                              <th class="" id=""><input onkeydown="valider(event)" id="quantite" name="quantite" value="" type="text" class="form-control w100 right"></th>
+                              <th class="right" id=""><button class="btn btn-sm btn-primary w90">Valider</button></th>
+                        </tr>
+                  </thead>
+                  <tbody>
+                        {%for row in rows%}
+                        <tr>
+                              <td class="left">{{row.numArticle}}</td>
+                              <td class="left">{{row.designation}}</td>
+                              <td class="right">{{row.prixUnitaire}}</td>
+                              <td class="right">{{row.quantite}}</td>
+                              <td class="right">{{row.montant}}</td>
+                        </tr>
+                        {%endfor%}
+                  </tbody>
+                  <tfoot>
+                        <tr>
+                              <th colspan="4" class="center fw-bold">Total</th>
+                              <th id="tfoot_total" class="right fw-bold">{{total~" €"}}</th>
+                        </tr>
+                  </tfoot>
+            </table>
+      </div>
+</div>
+      {%endblock%}
+
+      {%block script%}
+      <script>
+
+            function valider(event) {
+                  if(event.keyCode == 13) {
+                        let xhr = new XMLHttpRequest();
+                        xhr.open('POST', "{{path('app_commande_submit')}}");
+                        let data = new FormData();
+                        data.append('commande_id', document.getElementById('commande_id').value);
+                        data.append('numArticle', numArticle.value);
+                        data.append('quantite', quantite.value);
+                        xhr.send(data);
+                        xhr.onload=function(){
+                              let response = xhr.responseText;
+                              let responses = JSON.parse(response);
+                              const rows=responses.rows;
+                              const total_commande=responses.total;
+                              total.innerHTML = total_commande+" €";
+                              tfoot-total.innerHTML = total_commande;
+                              let html=rows.map(function(row){
+                                    return `
+                                    <td class="left">${row.numArticle}</td>
+                                    <td class="left">${row.designation}</td>
+                                    <td class="right">${row.prixUnitaire}</td>
+                                    <td class="right">${row.quantite}</td>
+                                    <td class="right">${row.montant}</td>
+                                    `
+                              }).join('');
+                              tbody_row.innerHTML = html;
+                              numArticle.value='';
+                              quantite.value='';
+                              designation.innerHTML='';
+                              prixUnitaire.innerHTML='';
+                        }
+                  }
+            }
+
+            function searchCode(event){
+                  if(event.keyCode==13){
+                        let xhr = new XMLHttpRequest();
+                        xhr.open('POST', "{{path('app_commande_search_code')}}");
+                        let data=new FormData();
+                        data.append('numArticle', document.getElementById('numArticle').value);
+                        xhr.send(data);
+                        xhr.onload=function(){
+                              const response=xhr.responseText;
+                              const article=JSON.parse(response);
+                              if(article){
+                                    designation.innerHTML=article.designation;
+                                    prixUnitaire.innerHTML=article.prixUnitaire;
+                                    prixUnitaire.focus();
+
+                              }
+                        alert(response);
+                        }
+                  }
+            }
+      </script>
+      {%endblock%}

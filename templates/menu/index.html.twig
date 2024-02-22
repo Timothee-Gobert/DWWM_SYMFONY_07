@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste menu{% endblock %}
+
+{% block body %}
+    <div class="m-auto w80 my-4">
+        <h1 class="titre center text-light">LISTE Menu</h1>
+        <div class="div-btn my-2">
+            <a href="javascript:creer()" class="btn btn-md btn-success"><i class="fas fa-plus"></i>Nouveau menu</a>
+            <a href="javascript:afficher()" class="btn btn-md btn-success"><i class="fas fa-shower"></i> Afficher</a>
+            <a href="javascript:modifier()" class="btn btn-md btn-primary"><i class="fas fa-highlighter"></i> Modifier</a>
+            <a href="javascript:supprimer()" class="btn btn-md btn-danger"><i class="fas fa-trash"></i> Supprimer</a>
+            <a href="javascript:writeExcel()" class="btn btn-md btn-success"><i class="fas fa-file-excel"></i> Excel</a>
+        </div>
+        <a id="excel" class="hidden"  href="#"  download >Exporter</a>
+        <table class="w100">
+            <thead id="thead_menu">
+                <tr class="bg-dark">
+                    <th></th>
+                    <th>Libelle</th>
+                    <th>url</th>
+                    <th>icone</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="tbody_menu">
+                {{menu|raw}}
+            </tbody>
+
+            <tfoot id="tfoot_menu">
+                <tr class="bg-dark">
+                    <td class="center" colspan="5">Nombre menu {{nbre}}</td>
+                </tr>
+            </tfoot>
+
+        </table>
+    </div>
+
+{% endblock %}
+{%block script%}
+    <script>
+
+        let url_edit = "{{path('app_menu_edit',{'id':'id'})}}";
+        let url_show = "{{path('app_menu_show',{'id':'id'})}}";
+        let url_delete = "{{path('app_menu_delete',{'id':'id'})}}";
+
+        function creer(){
+            const url=url_edit.replace('id',0);
+            document.location.href=url;
+        }
+
+        function afficher(){
+            const id=getIdChecked('check');
+            if(id==0){
+                alert("Veuillez saisir une ligne!");
+                return;
+            }
+            const url=url_show.replace('id',id);
+            document.location.href=url;
+        } 
+
+        function modifier(){
+            const id=getIdChecked('check');
+            
+                if(id==0){
+
+                alert("Selectionner bien une ligne");
+                return;
+            }            
+            const url=url_edit.replace('id',id);
+            document.location.href=url;
+        }
+        
+        function supprimer(){
+            const id=getIdChecked('check');
+            if(id==0){
+                alert("Veuillez saisir une ligne!");
+                return;
+            }
+            const confirm=confirm("Etes-vous sûr de vouloir supprimer ce menu ?");
+            if (confirm){
+                const url=url_delete.replace('id',id);
+                let xhr=new XMLHttpRequest();
+                xhr.open('POST', url, true);
+                xhr.send();
+                xhr.onload=()=>{
+                    let response=xhr.responseText;
+                    alert(response);
+                }
+            document.location.href="{{path('app_menu')}}";
+            }
+            document.location.href=url;
+        }
+ 
+    </script>
+{% endblock %}
