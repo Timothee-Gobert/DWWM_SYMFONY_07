@@ -10,3 +10,15 @@ Popur les base de donnée MariaDb mettre la version
 
 DATABASE_URL=mysql://root:@127.0.0.1:3306/essai?serverVersion=mariadb-10.5.5
 
+
+
+
+
+
+
+
+
+
+## commande utilisées
+
+symfony console make:controller MenuDynamique
